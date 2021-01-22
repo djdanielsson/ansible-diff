@@ -1,0 +1,18 @@
+{% set count = 0 %}
+{% set lines_f1 = [] %}
+{% for line in file1_list|sort()  -%}
+{{ lines_f1.append( line ) }}
+{%- endfor %}
+{% set lines_f2 = [] %}
+{% for line2 in file2_list|sort()  -%}
+{{ lines_f2.append( line2 ) }}
+{%- endfor %}
+{% for i in lines_f1 -%}
+{% set count =  loop.index0 %}
+{% if i == lines_f2[count] %}
+{{ i }} | {{ lines_f2[count] }}
+{% else %}
+{% set linez = loop.index %}
+on line {{ linez }} : {{ i }} is different then {{ lines_f2[count] }}
+{% endif %}
+{%- endfor %}

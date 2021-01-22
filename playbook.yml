@@ -2,28 +2,6 @@
 - name: test
   hosts: localhost
   connection: local
-  tasks:
-    - name: file 1
-      ansible.builtin.stat:
-        path: test1
-      register: r_test1
-        
-    - name: file 2
-      ansible.builtin.stat:
-        path: test2
-      register: r_test2
+  roles:
+    - compare
 
-    - block:
-        - name: check for diff
-          ansible.builtin.debug:
-            msg: "file are the same"
-          failed_when: r_test1.stat.checksum != r_test2.stat.checksum
-
-      rescue:
-        - name: line by line
-          ansible.builtin.template:
-            src: templates/diff.txt.j2
-            dest: diff.txt
-          vars:
-            file1_list: "{{ lookup('file', './test1').splitlines() }}"
-            file2_list: "{{ lookup('file', './test2').splitlines() }}"

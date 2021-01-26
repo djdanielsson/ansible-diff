@@ -7,12 +7,19 @@
 {% for line2 in file2_list|sort()  -%}
 {{ lines_f2.append( line2 ) }}
 {%- endfor %}
+{% if lines_f1|length == lines_f2|length %}
 {% for i in lines_f1 -%}
 {% set count =  loop.index0 %}
+{% if lines_f2[count] is defined %}
 {% if i == lines_f2[count] %}
 {{ i }} | {{ lines_f2[count] }}
 {% else %}
 {% set linez = loop.index %}
 on line {{ linez }} : {{ i }} is different then {{ lines_f2[count] }}
 {% endif %}
+{% else %}
+{% set linez = loop.index %}
+line {{ linez }} : {{ i }} does not exist in other file
+{% endif %}
 {%- endfor %}
+{% endif %}

@@ -10,6 +10,11 @@
     path: tests/test2
   register: r_test2
 
+- name: debug check vv
+  ansible.builtin.debug:
+    msg: "{{ r_test1.stat }}"
+    verbosity: 2
+
 - block:
     - name: check for diff
       ansible.builtin.debug:
@@ -21,7 +26,79 @@
       ansible.builtin.template:
         src: templates/diff.txt.j2
         dest: diff.txt
-      vars:
-        file1_list: "{{ lookup('file', 'tests/test1').splitlines() }}"
-        file2_list: "{{ lookup('file', 'tests/test2').splitlines() }}"
+
+    - name: debug check vv
+      ansible.builtin.debug:
+        msg: "{{ file1_list|length }}"
+        verbosity: 2
+
+    - name: debug check vv
+      ansible.builtin.debug:
+        msg: "{{ file2_list|length }}"
+        verbosity: 2
+
+    - name: setfact
+      ansible.builtin.set_fact:
+        file1_length: "{{ file1_list|length }}"
+
+    - name: setfact
+      ansible.builtin.set_fact:
+        file2_length: "{{ file2_list|length }}"
+
+    - name: creating a new file1 to modify
+      ansible.builtin.copy:
+        src: /home/ddaniels/workspace/ansible-diff/roles/compare/tests/test1
+        dest: /home/ddaniels/workspace/ansible-diff/roles/compare/tests/test1-new
+        remote_src: yes
+
+    - name: line by lineV2
+      ansible.builtin.lineinfile:
+        path: /home/ddaniels/workspace/ansible-diff/roles/compare/tests/test1-new
+        line: "{{ item }}"
+        state: absent
+      register: diffs1
+      when: "{{ file1_length }} != {{ file2_length }}"
+      loop: "{{ file2_list }}"
+
+    - name: get file1 contents
+      ansible.builtin.slurp:
+        src: /home/ddaniels/workspace/ansible-diff/roles/compare/tests/test1-new
+      register: diff1_content
+      when: diffs1.changed
+
+    - name: append file contents to diff.txt
+      ansible.builtin.lineinfile:
+        path: /home/ddaniels/workspace/ansible-diff/diff.txt
+        line: "{{ diff1_content['content']|b64decode }}"
+        insertafter: EOF
+      when: diffs1.changed
+
+
+    - name: creating a new file2 to modify
+      ansible.builtin.copy:
+        src: /home/ddaniels/workspace/ansible-diff/roles/compare/tests/test2
+        dest: /home/ddaniels/workspace/ansible-diff/roles/compare/tests/test2-new
+        remote_src: yes
+
+    - name: line by lineV2
+      ansible.builtin.lineinfile:
+        path: /home/ddaniels/workspace/ansible-diff/roles/compare/tests/test2-new
+        line: "{{ item }}"
+        state: absent
+      register: diffs2
+      when: "{{ file1_length }} != {{ file2_length }}"
+      loop: "{{ file1_list }}"
+
+    - name: get file2 contents
+      ansible.builtin.slurp:
+        src: /home/ddaniels/workspace/ansible-diff/roles/compare/tests/test2-new
+      register: diff2_content
+      when: diffs2.changed
+
+    - name: copy diffs into diff.txt
+      ansible.builtin.lineinfile:
+        path: /home/ddaniels/workspace/ansible-diff/diff.txt
+        line: "{{ diff2_content['content']|b64decode }}"
+        insertafter: EOF
+      when: diffs2.changed
 

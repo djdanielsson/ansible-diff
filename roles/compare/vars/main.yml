@@ -1,2 +1,4 @@
 ---
 # vars file for compare
+file1_list: "{{ lookup('file', 'tests/test1').splitlines() }}"
+file2_list: "{{ lookup('file', 'tests/test2').splitlines() }}"

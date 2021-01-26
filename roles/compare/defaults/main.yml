@@ -1,2 +1,9 @@
 ---
 # defaults file for compare
+diff_txt: '/home/ddaniels/workspace/ansible-diff/diff.txt'
+tests_file2: '/home/ddaniels/workspace/ansible-diff/roles/compare/tests/test2'
+tests_file2_tmp: '/home/ddaniels/workspace/ansible-diff/roles/compare/tests/test2-tmp'
+tests_file1: '/home/ddaniels/workspace/ansible-diff/roles/compare/tests/test1'
+tests_file1_tmp: '/home/ddaniels/workspace/ansible-diff/roles/compare/tests/test1-tmp'
+file1_list: "{{ lookup('file', 'tests/test1').splitlines() }}"
+file2_list: "{{ lookup('file', 'tests/test2').splitlines() }}"
